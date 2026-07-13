@@ -20,7 +20,8 @@ public class DemoApplication {
 //		System.out.println(student.getName());
 
 
-		OrderService orderService = context.getBean(OrderService.class);
-			orderService.placeOrder();
+//		OrderService orderService = context.getBean(OrderService.class);
+//			orderService.placeOrder();
+//	}
 	}
 }
