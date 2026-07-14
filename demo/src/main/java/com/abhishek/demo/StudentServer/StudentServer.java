@@ -9,18 +9,18 @@ public class StudentServer {
 
     //1. Store the student info into database
 
-    @PostMapping("/create")
-    public String storeStudent(@RequestBody Student student){
-        int id = student.getId();
-        String name = student.getName();
-        int age = student.getAge();
-        String department = student.getDepartment();
-
-        return "id:" +id +
-                ", name: " + name +
-                ", age: " + age +
-                ", department: " + department;
-    }
+//    @PostMapping("/create")
+//    public String storeStudent(@RequestBody Student student){
+//        int id = student.getId();
+//        String name = student.getName();
+//        int age = student.getAge();
+//        String department = student.getDepartment();
+//
+//        return "id:" +id +
+//                ", name: " + name +
+//                ", age: " + age +
+//                ", department: " + department;
+//    }
     //2. Get the stored student info
 
 
