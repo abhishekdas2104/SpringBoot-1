@@ -1,5 +1,7 @@
-package com.abhishek.demo.StudentServer;
+package com.abhishek.demo.StudentServer.Service;
 
+import com.abhishek.demo.StudentServer.Repository.StudentRepository;
+import com.abhishek.demo.StudentServer.Entity.Student;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,5 +29,9 @@ public class StudentService {
 
         studentRepository.save(student);
         return student;
+    }
+
+    public Student getStudentById(int id) {
+        return studentRepository.findById(id).orElse(null);
     }
 }

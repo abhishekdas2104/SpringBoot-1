@@ -1,6 +1,6 @@
-package com.abhishek.demo.StudentServer;
+package com.abhishek.demo.StudentServer.Repository;
 
-import org.springframework.stereotype.Repository;
+import com.abhishek.demo.StudentServer.Entity.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
