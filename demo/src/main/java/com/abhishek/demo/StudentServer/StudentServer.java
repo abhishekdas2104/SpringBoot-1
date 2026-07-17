@@ -1,11 +1,11 @@
-package com.abhishek.demo.StudentServer;
-
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-
-@RestController
-public class StudentServer {
+//package com.abhishek.demo.StudentServer;
+//
+//import org.springframework.web.bind.annotation.PostMapping;
+//import org.springframework.web.bind.annotation.RequestBody;
+//import org.springframework.web.bind.annotation.RestController;
+//
+//@RestController
+//public class StudentServer {
 
     //1. Store the student info into database
 
@@ -26,4 +26,4 @@ public class StudentServer {
 
 
 
-}
+//}
