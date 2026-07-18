@@ -1,7 +1,7 @@
 package com.abhishek.demo.StudentServer.Service;
 
-import com.abhishek.demo.StudentServer.Repository.StudentRepository;
 import com.abhishek.demo.StudentServer.Entity.Student;
+import com.abhishek.demo.StudentServer.Repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,31 +15,30 @@ public class StudentService {
         this.studentRepository = studentRepository;
     }
 
-
-    public Student studentValidate(Student student){
+    public Student studentValidate(Student student) {
 
         int id = student.getId();
         String name = student.getName();
         int age = student.getAge();
         String department = student.getDepartment();
 
-        if(id<0 || name == null || age < 0 || department == null){
+        if (id <= 0 || name == null || name.isBlank()
+                || age <= 0 || department == null || department.isBlank()) {
             return null;
         }
 
-        studentRepository.save(student);
-        return student;
+        return studentRepository.save(student);
     }
 
     public Student getStudentById(int id) {
         return studentRepository.findById(id).orElse(null);
     }
 
-    public Student saveStudent(Student student){
+    public Student saveStudent(Student student) {
         return studentRepository.save(student);
     }
 
-    public void deleteStudent(int id){
+    public void deleteStudent(int id) {
         studentRepository.deleteById(id);
     }
 }

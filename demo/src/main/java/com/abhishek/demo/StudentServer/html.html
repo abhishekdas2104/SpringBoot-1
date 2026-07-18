@@ -3,550 +3,733 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Registry — Departures</title>
+    <title>Student Registry — Catalog Desk</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root{
-            --case:#16171a;
-            --case-trim:#2b2d31;
-            --rail:#3a3d43;
-            --flap-bg:#f0ebe0;
-            --flap-ink:#17181a;
-            --flap-seam:rgba(0,0,0,0.22);
-            --paper-dim:#a9adb5;
-            --paper-dim-2:#787c85;
-
-            --create:#2f8f5b;
-            --create-bg:rgba(47,143,91,0.16);
-            --lookup:#2f79b0;
-            --lookup-bg:rgba(47,121,176,0.16);
-            --update:#c98a1f;
-            --update-bg:rgba(201,138,31,0.16);
-            --delete:#b23a2e;
-            --delete-bg:rgba(178,58,46,0.16);
-
-            --focus:#5fb0e0;
-            --display:'Barlow Condensed', sans-serif;
-            --body-font:'Barlow', sans-serif;
-            --mono:'IBM Plex Mono', monospace;
+            --bg: #090a10;
+            --panel: rgba(17, 20, 34, 0.7);
+            --panel-raised: rgba(24, 28, 47, 0.85);
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #e6e9f0;
+            --text-dim: #8b92ad;
+            
+            --neon-cyan: #00f2fe;
+            --neon-purple: #b92bff;
+            --neon-green: #00f5a0;
+            --neon-red: #ff4757;
+            --neon-orange: #ff9f43;
+            
+            --font-sans: 'Outfit', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            
+            --card-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
         }
 
-        * { box-sizing:border-box; }
-
-        body{
-            margin:0;
-            min-height:100vh;
-            background:#0c0d0f;
-            background-image: radial-gradient(circle at 50% 0%, #1c1e22 0%, #0c0d0f 60%);
-            color:var(--paper-dim);
-            font-family:var(--body-font);
-            padding:40px 16px 70px;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        .board{
-            max-width:640px;
-            margin:0 auto;
-            background:var(--case);
-            border:1px solid var(--case-trim);
-            border-radius:10px;
-            box-shadow: 0 24px 60px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(255,255,255,0.02);
-            padding:22px 22px 26px;
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+            padding: 48px 20px 80px;
+            gap: 20px;
         }
 
-        .board-head{
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            gap:14px;
-            padding:6px 0 4px;
-        }
-        .rivet{
-            width:8px; height:8px; border-radius:50%;
-            background:radial-gradient(circle at 35% 35%, #6b6f77, #26282c 70%);
-            flex-shrink:0;
-        }
-        h1{
-            font-family:var(--display);
-            font-weight:700;
-            text-transform:uppercase;
-            letter-spacing:0.16em;
-            font-size:clamp(22px, 4vw, 30px);
-            color:var(--flap-bg);
-            margin:0;
-            text-align:center;
-        }
-        .board-sub{
-            text-align:center;
-            font-family:var(--mono);
-            font-size:11px;
-            letter-spacing:0.05em;
-            color:var(--paper-dim-2);
-            margin:2px 0 20px;
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            background-size: 30px 30px;
+            pointer-events: none;
+            z-index: 0;
         }
 
-        /* ---------- MANIFEST TABLE ---------- */
-        .manifest{
-            border-top:1px solid var(--rail);
-            border-bottom:1px solid var(--rail);
-        }
-        .manifest-head-row{
-            display:grid;
-            grid-template-columns: 40px 1fr 1fr 34px 20px;
-            gap:8px;
-            padding:8px 6px;
-            font-family:var(--mono);
-            font-size:10px;
-            letter-spacing:0.08em;
-            text-transform:uppercase;
-            color:var(--paper-dim-2);
-            border-bottom:1px dashed var(--rail);
+        body::after {
+            content: "";
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(0, 242, 254, 0.07) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 0;
         }
 
-        .row + .row{ border-top:1px dashed var(--rail); }
-
-        .row-head{
-            display:grid;
-            grid-template-columns: 40px 1fr 1fr 34px 20px;
-            gap:8px;
-            align-items:center;
-            width:100%;
-            background:transparent;
-            border:none;
-            padding:13px 6px;
-            cursor:pointer;
-            text-align:left;
-            color:var(--flap-bg);
-            font-family:var(--body-font);
-        }
-        .row-head:hover{ background:rgba(255,255,255,0.03); }
-        .row-head:focus-visible{ outline:2px solid var(--focus); outline-offset:-2px; }
-
-        .trk{
-            font-family:var(--mono);
-            font-size:13px;
-            color:var(--paper-dim-2);
-        }
-        .opname{
-            font-family:var(--display);
-            font-weight:700;
-            letter-spacing:0.04em;
-            font-size:17px;
-            text-transform:uppercase;
-        }
-        .route{
-            font-family:var(--mono);
-            font-size:11.5px;
-            color:var(--paper-dim);
-        }
-        .flag{
-            width:14px; height:14px;
-            border-radius:3px;
-            justify-self:center;
-        }
-        .row[data-op="create"] .flag{ background:var(--create); }
-        .row[data-op="lookup"] .flag{ background:var(--lookup); }
-        .row[data-op="update"] .flag{ background:var(--update); }
-        .row[data-op="remove"] .flag{ background:var(--delete); }
-
-        .chev{
-            font-size:12px;
-            color:var(--paper-dim-2);
-            justify-self:end;
-            transition:transform .15s ease;
-        }
-        .row.open .chev{ transform:rotate(180deg); }
-
-        .row-panel{
-            display:none;
-            padding:4px 8px 20px 48px;
-        }
-        .row.open .row-panel{ display:block; }
-
-        .op-desc{
-            font-size:13px;
-            color:var(--paper-dim-2);
-            margin:0 0 16px;
-            line-height:1.5;
-            max-width:46ch;
+        .container {
+            width: 100%;
+            max-width: 620px;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
         }
 
-        .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-
-        .field{ margin-bottom:12px; }
-        .field label{
-            display:block;
-            font-family:var(--mono);
-            font-size:10px;
-            letter-spacing:0.06em;
-            text-transform:uppercase;
-            color:var(--paper-dim-2);
-            margin-bottom:5px;
-        }
-        .field input{
-            width:100%;
-            background:#0f1012;
-            border:1px solid var(--rail);
-            border-radius:5px;
-            color:var(--flap-bg);
-            font-family:var(--mono);
-            font-size:13px;
-            padding:9px 10px;
-            outline:none;
-        }
-        .field input:focus{ border-color:var(--focus); }
-        .field input::placeholder{ color:#585c63; }
-
-        .depart{
-            display:inline-flex;
-            align-items:center;
-            gap:8px;
-            font-family:var(--display);
-            font-weight:700;
-            letter-spacing:0.06em;
-            text-transform:uppercase;
-            font-size:13.5px;
-            color:#0c0d0f;
-            border:none;
-            border-radius:5px;
-            padding:9px 18px;
-            cursor:pointer;
-            margin-top:6px;
-        }
-        .depart:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
-        .row[data-op="create"] .depart{ background:var(--create); }
-        .row[data-op="lookup"] .depart{ background:var(--lookup); }
-        .row[data-op="update"] .depart{ background:var(--update); }
-        .row[data-op="remove"] .depart{ background:var(--delete); }
-
-        /* ---------- READOUT ---------- */
-        .readout{ margin-top:22px; }
-        .readout-head{
-            font-family:var(--mono);
-            font-size:10px;
-            letter-spacing:0.1em;
-            text-transform:uppercase;
-            color:var(--paper-dim-2);
-            margin-bottom:8px;
+        .drawer-label {
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--neon-cyan);
+            margin-bottom: 6px;
+            z-index: 1;
+            text-shadow: 0 0 8px rgba(0, 242, 254, 0.35);
         }
 
-        .flap-row{
-            display:flex;
-            align-items:center;
-            gap:10px;
-            margin-bottom:10px;
-        }
-        .flap-slot{
-            position:relative;
-            width:32px; height:44px;
-            background:var(--flap-bg);
-            color:var(--flap-ink);
-            border-radius:3px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-family:var(--display);
-            font-weight:700;
-            font-size:26px;
-            box-shadow: inset 0 -12px 14px -10px rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.08);
-            perspective: 120px;
-            flex-shrink:0;
-        }
-        .flap-slot::after{
-            content:'';
-            position:absolute;
-            left:0; right:0; top:50%;
-            height:1px;
-            background:var(--flap-seam);
-        }
-        .flap-slot.flip{ animation:flipDown .32s ease; }
-        @keyframes flipDown{
-            0%{ transform:rotateX(0deg); }
-            48%{ transform:rotateX(-90deg); }
-            52%{ transform:rotateX(90deg); }
-            100%{ transform:rotateX(0deg); }
+        .drawer-label::before {
+            content: "● ";
+            animation: blink 1.5s infinite;
         }
 
-        .readout-caption{
-            font-family:var(--mono);
-            font-size:12px;
-            color:var(--paper-dim-2);
-        }
-        .readout-caption.ok{ color:var(--create); }
-        .readout-caption.err{ color:var(--delete); }
-
-        .readout-body{
-            margin:0;
-            background:#0f1012;
-            border:1px solid var(--rail);
-            border-radius:6px;
-            padding:12px 14px;
-            font-family:var(--mono);
-            font-size:12px;
-            line-height:1.6;
-            color:var(--paper-dim);
-            white-space:pre-wrap;
-            word-break:break-word;
-            min-height:20px;
-            max-height:260px;
-            overflow:auto;
+        @keyframes blink {
+            50% { opacity: 0.3; }
         }
 
-        .board-foot{
-            display:flex;
-            align-items:center;
-            gap:10px;
-            margin-top:22px;
-            padding-top:16px;
-            border-top:1px solid var(--rail);
-        }
-        .board-foot label{
-            font-family:var(--mono);
-            font-size:10px;
-            letter-spacing:0.08em;
-            text-transform:uppercase;
-            color:var(--paper-dim-2);
-            flex-shrink:0;
-        }
-        .board-foot input{
-            flex:1;
-            background:#0f1012;
-            border:1px solid var(--rail);
-            border-radius:5px;
-            color:var(--flap-bg);
-            font-family:var(--mono);
-            font-size:12px;
-            padding:8px 10px;
-            outline:none;
-        }
-        .board-foot input:focus{ border-color:var(--focus); }
-
-        @media (max-width:520px){
-            .manifest-head-row, .row-head{ grid-template-columns: 28px 1fr 24px 18px; }
-            .route{ display:none; }
-            .row-panel{ padding-left:10px; }
-            .grid-2{ grid-template-columns:1fr; }
-            .board{ padding:18px 14px 20px; }
+        h1 {
+            text-align: center;
+            font-size: clamp(28px, 5vw, 42px);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin: 0 0 6px;
+            background: linear-gradient(135deg, #ffffff 40%, #a5b1c2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            z-index: 1;
         }
 
-        @media (prefers-reduced-motion: reduce){
-            * { animation:none !important; transition:none !important; }
+        .subhead {
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            max-width: 500px;
+            margin: 0 auto 8px;
+            line-height: 1.5;
+            z-index: 1;
+        }
+
+        .config {
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            z-index: 1;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .config label {
+            color: var(--text-dim);
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .config input {
+            flex: 1;
+            border: none;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--neon-cyan);
+            outline: none;
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+
+        .config input:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 8px rgba(0, 242, 254, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tabs {
+            width: 100%;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 4px;
+            gap: 4px;
+            z-index: 1;
+        }
+
+        .tab {
+            font-family: var(--font-sans);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-dim);
+            padding: 10px 8px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .tab:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .tab.active {
+            background: var(--panel-raised);
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            position: relative;
+        }
+
+        .tab:focus-visible {
+            outline: 2px solid var(--neon-cyan);
+            outline-offset: 2px;
+        }
+
+        .card-wrap {
+            width: 100%;
+            margin: 0 auto;
+            z-index: 1;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            padding: 30px;
+            position: relative;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: none;
+        }
+
+        .card.active {
+            display: block;
+            animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(12px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .punch {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 8px;
+            height: 8px;
+            background-color: var(--neon-cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan);
+            animation: pulse 2.2s infinite;
+        }
+
+        #card-create .punch { background-color: var(--neon-green); box-shadow: 0 0 10px var(--neon-green), 0 0 20px var(--neon-green); }
+        #card-lookup .punch { background-color: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan); }
+        #card-update .punch { background-color: var(--neon-orange); box-shadow: 0 0 10px var(--neon-orange), 0 0 20px var(--neon-orange); }
+        #card-remove .punch { background-color: var(--neon-red); box-shadow: 0 0 10px var(--neon-red), 0 0 20px var(--neon-red); }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.15); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+
+        .status-tag {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            letter-spacing: 0.05em;
+        }
+
+        #card-create .status-tag { background: rgba(0, 245, 160, 0.1); color: var(--neon-green); border: 1px solid rgba(0, 245, 160, 0.2); }
+        #card-lookup .status-tag { background: rgba(0, 242, 254, 0.1); color: var(--neon-cyan); border: 1px solid rgba(0, 242, 254, 0.2); }
+        #card-update .status-tag { background: rgba(255, 159, 67, 0.1); color: var(--neon-orange); border: 1px solid rgba(255, 159, 67, 0.2); }
+        #card-remove .status-tag { background: rgba(255, 71, 87, 0.1); color: var(--neon-red); border: 1px solid rgba(255, 71, 87, 0.2); }
+
+        .card-title {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        .card-desc {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            margin-bottom: 24px;
+            line-height: 1.5;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .field {
+            margin-bottom: 20px;
+        }
+
+        .field label {
+            display: block;
+            font-family: var(--font-sans);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+        }
+
+        .field input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            color: #ffffff;
+            padding: 12px 14px;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+
+        .field input::placeholder {
+            color: #4b5268;
+        }
+
+        .field input:focus {
+            background: rgba(0, 0, 0, 0.3);
+            outline: none;
+        }
+
+        #card-create .field input:focus { border-color: var(--neon-green); box-shadow: 0 0 10px rgba(0, 245, 160, 0.15); }
+        #card-lookup .field input:focus { border-color: var(--neon-cyan); box-shadow: 0 0 10px rgba(0, 242, 254, 0.15); }
+        #card-update .field input:focus { border-color: var(--neon-orange); box-shadow: 0 0 10px rgba(255, 159, 67, 0.15); }
+        #card-remove .field input:focus { border-color: var(--neon-red); box-shadow: 0 0 10px rgba(255, 71, 87, 0.15); }
+
+        .row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 12px;
+        }
+
+        button.stamp {
+            font-family: var(--font-sans);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-transform: none;
+            transform: none;
+        }
+
+        button.stamp:hover {
+            transform: translateY(-2px);
+        }
+
+        button.stamp:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .stamp.create { background: linear-gradient(135deg, #00f5a0 0%, #00d285 100%); color: #07080e; }
+        .stamp.create:hover { box-shadow: 0 0 20px rgba(0, 245, 160, 0.4); }
+
+        .stamp.lookup { background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); color: #07080e; }
+        .stamp.lookup:hover { box-shadow: 0 0 20px rgba(0, 242, 254, 0.4); }
+
+        .stamp.update { background: linear-gradient(135deg, #ff9f43 0%, #ff7f0e 100%); color: #07080e; }
+        .stamp.update:hover { box-shadow: 0 0 20px rgba(255, 159, 67, 0.4); }
+
+        .stamp.remove { background: linear-gradient(135deg, #ff4757 0%, #ee2e3e 100%); color: #ffffff; }
+        .stamp.remove:hover { box-shadow: 0 0 20px rgba(255, 71, 87, 0.4); }
+
+        .result {
+            margin-top: 24px;
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            padding: 16px;
+            background: #05060b;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: #8395a7;
+            max-height: 250px;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.8);
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result.ok {
+            border-color: rgba(0, 245, 160, 0.2);
+            color: #00f5a0;
+        }
+
+        .result.err {
+            border-color: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+        }
+
+        .result::before {
+            content: "RESPONSE_CONSOLE";
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 9px;
+            font-weight: 500;
+            color: var(--text-dim);
+            letter-spacing: 0.08em;
+            margin-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 6px;
+        }
+
+        .result::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .result::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .result::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+        }
+        .result::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 12px;
+            font-family: var(--font-sans);
+            font-size: 12px;
+            color: var(--text-dim);
+            opacity: 0.8;
+            z-index: 1;
+        }
+
+        @media (max-width: 500px) {
+            .row-2 {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            .tabs {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 4px;
+            }
+            .card {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { transition: none !important; }
+            button.stamp { transform: none !important; }
         }
     </style>
 </head>
 <body>
 
-<div class="board">
-    <div class="board-head">
-        <span class="rivet"></span>
-        <h1>Student Registry</h1>
-        <span class="rivet"></span>
-    </div>
-    <p class="board-sub">live board — rows reflect your Spring API</p>
+<div class="drawer-label">Registrar's Office — Records Drawer 4</div>
+<h1>Student Catalog</h1>
+<p class="subhead">One card per student. File, find, amend, or withdraw a record.</p>
 
-    <div class="manifest" role="tablist" aria-label="Operations">
-        <div class="manifest-head-row">
-            <span>Trk</span><span>Operation</span><span>Route</span><span>Flag</span><span></span>
-        </div>
-
-        <div class="row open" data-op="create">
-            <button class="row-head" aria-expanded="true" aria-controls="panel-create">
-                <span class="trk">01</span>
-                <span class="opname">Create</span>
-                <span class="route">POST /create</span>
-                <span class="flag"></span>
-                <span class="chev">▾</span>
-            </button>
-            <div class="row-panel" id="panel-create">
-                <p class="op-desc">Adds a new record. Fails with 400 if the ID already exists.</p>
-                <div class="grid-2">
-                    <div class="field"><label for="c-name">Full name</label><input id="c-name" type="text" placeholder="e.g. Your Name"></div>
-                    <div class="field"><label for="c-id">Student ID</label><input id="c-id" type="text" placeholder="e.g. 101"></div>
-                </div>
-                <div class="grid-2">
-                    <div class="field"><label for="c-age">Age</label><input id="c-age" type="number" min="0" placeholder="e.g. 18"></div>
-                    <div class="field"><label for="c-dep">Department</label><input id="c-dep" type="text" placeholder="e.g. Computer Science"></div>
-                </div>
-                <button class="depart" onclick="createStudent()">Depart →</button>
-            </div>
-        </div>
-
-        <div class="row" data-op="lookup">
-            <button class="row-head" aria-expanded="false" aria-controls="panel-lookup">
-                <span class="trk">02</span>
-                <span class="opname">Lookup</span>
-                <span class="route">GET /get/:id</span>
-                <span class="flag"></span>
-                <span class="chev">▾</span>
-            </button>
-            <div class="row-panel" id="panel-lookup">
-                <p class="op-desc">Fetches a single record by ID.</p>
-                <div class="field"><label for="l-id">Student ID</label><input id="l-id" type="text" placeholder="e.g. 101"></div>
-                <button class="depart" onclick="getStudent()">Depart →</button>
-            </div>
-        </div>
-
-        <div class="row" data-op="update">
-            <button class="row-head" aria-expanded="false" aria-controls="panel-update">
-                <span class="trk">03</span>
-                <span class="opname">Update</span>
-                <span class="route">POST /update/:id</span>
-                <span class="flag"></span>
-                <span class="chev">▾</span>
-            </button>
-            <div class="row-panel" id="panel-update">
-                <p class="op-desc">Overwrites the whole record — fill in every field, including values that stay the same.</p>
-                <div class="field"><label for="u-id">Student ID</label><input id="u-id" type="text" placeholder="e.g. 101"></div>
-                <div class="grid-2">
-                    <div class="field"><label for="u-name">Full name</label><input id="u-name" type="text" placeholder="Name"></div>
-                    <div class="field"><label for="u-age">Age</label><input id="u-age" type="number" min="0" placeholder="Age"></div>
-                </div>
-                <div class="field"><label for="u-dep">Department</label><input id="u-dep" type="text" placeholder="Department"></div>
-                <button class="depart" onclick="updateStudent()">Depart →</button>
-            </div>
-        </div>
-
-        <div class="row" data-op="remove">
-            <button class="row-head" aria-expanded="false" aria-controls="panel-remove">
-                <span class="trk">04</span>
-                <span class="opname">Delete</span>
-                <span class="route">POST /delete/:id</span>
-                <span class="flag"></span>
-                <span class="chev">▾</span>
-            </button>
-            <div class="row-panel" id="panel-remove">
-                <p class="op-desc">Removes a record permanently. This cannot be undone.</p>
-                <div class="field"><label for="d-id">Student ID</label><input id="d-id" type="text" placeholder="e.g. 101"></div>
-                <button class="depart" onclick="deleteStudent()">Depart →</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="readout">
-        <div class="readout-head">Response</div>
-        <div class="flap-row">
-            <div class="flap-slot" data-i="0">&nbsp;</div>
-            <div class="flap-slot" data-i="1">&nbsp;</div>
-            <div class="flap-slot" data-i="2">&nbsp;</div>
-            <span class="readout-caption" id="readoutCaption">awaiting departure</span>
-        </div>
-        <pre class="readout-body" id="readoutBody"></pre>
-    </div>
-
-    <div class="board-foot">
-        <label for="baseUrl">Base&nbsp;url</label>
-        <input id="baseUrl" type="text" value="http://localhost:8080" spellcheck="false">
-    </div>
+<div class="config">
+    <label for="baseUrl">API base:</label>
+    <input id="baseUrl" type="text" value="http://localhost:8080" spellcheck="false">
 </div>
 
+<div class="tabs" role="tablist" aria-label="Record actions">
+    <button class="tab active" data-tab="create" role="tab" aria-selected="true">Create</button>
+    <button class="tab" data-tab="lookup" role="tab" aria-selected="false">Lookup</button>
+    <button class="tab" data-tab="update" role="tab" aria-selected="false">Update</button>
+    <button class="tab" data-tab="remove" role="tab" aria-selected="false">Remove</button>
+</div>
+
+<div class="card-wrap">
+
+    <!-- CREATE -->
+    <section class="card active" id="card-create">
+        <div class="punch"></div>
+        <div class="status-tag">POST /create</div>
+        <div class="card-title">New Student Card</div>
+        <p class="card-desc">File a new record into the drawer.</p>
+
+        <div class="row-2">
+            <div class="field">
+                <label for="c-name">Full name</label>
+                <input id="c-name" type="text" placeholder="e.g. Your Name">
+            </div>
+            <div class="field">
+                <label for="c-id">Student ID</label>
+                <input id="c-id" type="number" min="1" placeholder="e.g. 101">
+            </div>
+        </div>
+        <div class="row-2">
+            <div class="field">
+                <label for="c-age">Age</label>
+                <input id="c-age" type="number" min="0" placeholder="e.g. 18">
+            </div>
+            <div class="field">
+                <label for="c-dep">Department</label>
+                <input id="c-dep" type="text" placeholder="e.g. Computer Science">
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="stamp create" onclick="createStudent()">File Record</button>
+        </div>
+        <div class="result" id="result-create"></div>
+    </section>
+
+    <!-- LOOKUP -->
+    <section class="card" id="card-lookup">
+        <div class="punch"></div>
+        <div class="status-tag">GET /get/:id</div>
+        <div class="card-title">Find a Card</div>
+        <p class="card-desc">Pull a record by student ID.</p>
+
+        <div class="field">
+            <label for="l-id">Student ID</label>
+            <input id="l-id" type="number" min="1" placeholder="e.g. 123">
+        </div>
+
+        <div class="actions">
+            <button class="stamp lookup" onclick="getStudent()">Pull Card</button>
+        </div>
+        <div class="result" id="result-lookup"></div>
+    </section>
+
+    <!-- UPDATE -->
+    <section class="card" id="card-update">
+        <div class="punch"></div>
+        <div class="status-tag">PUT /update/:id</div>
+        <div class="card-title">Amend a Card</div>
+        <p class="card-desc">Revise the details already on file. All fields are saved as entered — fill in every one, including values that stay the same.</p>
+
+        <div class="field">
+            <label for="u-id">Student ID</label>
+            <input id="u-id" type="number" min="1" placeholder="e.g. 12318753">
+        </div>
+        <div class="row-2">
+            <div class="field">
+                <label for="u-name">Full name</label>
+                <input id="u-name" type="text" placeholder="Name">
+            </div>
+            <div class="field">
+                <label for="u-age">Age</label>
+                <input id="u-age" type="number" min="0" placeholder="Age">
+            </div>
+        </div>
+        <div class="field">
+            <label for="u-dep">Department</label>
+            <input id="u-dep" type="text" placeholder="Department">
+        </div>
+
+        <div class="actions">
+            <button class="stamp update" onclick="updateStudent()">Amend Record</button>
+        </div>
+        <div class="result" id="result-update"></div>
+    </section>
+
+    <!-- REMOVE -->
+    <section class="card" id="card-remove">
+        <div class="punch"></div>
+        <div class="status-tag">DELETE /delete/:id</div>
+        <div class="card-title">Withdraw a Card</div>
+        <p class="card-desc">Pull a record from the drawer for good. This cannot be undone.</p>
+
+        <div class="field">
+            <label for="d-id">Student ID</label>
+            <input id="d-id" type="number" min="1" placeholder="e.g. 1">
+        </div>
+
+        <div class="actions">
+            <button class="stamp remove" onclick="deleteStudent()">Withdraw Record</button>
+        </div>
+        <div class="result" id="result-remove"></div>
+    </section>
+
+</div>
+
+<footer>Talks to your API over fetch — nothing is stored in the browser.</footer>
+
 <script>
-    // ---- accordion ----
-    const rows = document.querySelectorAll('.row');
-    rows.forEach(row => {
-        row.querySelector('.row-head').addEventListener('click', () => {
-            const willOpen = !row.classList.contains('open');
-            rows.forEach(r => {
-                r.classList.remove('open');
-                r.querySelector('.row-head').setAttribute('aria-expanded', 'false');
-            });
-            if (willOpen) {
-                row.classList.add('open');
-                row.querySelector('.row-head').setAttribute('aria-expanded', 'true');
-            }
+    // ---- Tab switching ----
+    const tabs = document.querySelectorAll('.tab');
+    const cards = document.querySelectorAll('.card');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+            cards.forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            tab.setAttribute('aria-selected', 'true');
+            document.getElementById('card-' + tab.dataset.tab).classList.add('active');
         });
     });
 
-    function base(){
+    function base() {
         return document.getElementById('baseUrl').value.replace(/\/$/, '');
     }
 
-    // ---- flap status readout ----
-    const flapSlots = Array.from(document.querySelectorAll('.flap-slot'));
-    function setStatusFlaps(str){
-        const padded = str.toString().slice(0, 3).padStart(3, ' ').toUpperCase();
-        flapSlots.forEach((el, i) => {
-            const newChar = padded[i];
-            if (el.textContent.trim() !== newChar.trim() || el.textContent === '\u00A0') {
-                el.classList.add('flip');
-                setTimeout(() => { el.textContent = newChar === ' ' ? '\u00A0' : newChar; }, 150);
-                el.addEventListener('animationend', () => el.classList.remove('flip'), { once: true });
-            }
-        });
+    function showResult(id, ok, data) {
+        const el = document.getElementById(id);
+        el.classList.remove('ok', 'err');
+        el.classList.add('show', ok ? 'ok' : 'err');
+        el.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
     }
 
-    function setReadout(ok, statusLabel, captionText, bodyText){
-        setStatusFlaps(statusLabel);
-        const caption = document.getElementById('readoutCaption');
-        caption.textContent = captionText;
-        caption.className = 'readout-caption ' + (ok ? 'ok' : 'err');
-        document.getElementById('readoutBody').textContent = bodyText;
-    }
-
-    async function callApi(url, options){
+    async function callApi(url, options, resultId) {
         try {
             const res = await fetch(url, options);
             let body;
             const text = await res.text();
             try { body = JSON.parse(text); } catch { body = text; }
-            const pretty = typeof body === 'string' ? body : JSON.stringify(body, null, 2);
-            setReadout(
-                res.ok,
-                res.status,
-                res.ok ? 'on time · ' + res.status : 'delayed · ' + res.status,
-                pretty || (res.ok ? 'Done — no content returned.' : `Request failed (${res.status})`)
-            );
+            showResult(resultId, res.ok, body || (res.ok ? 'Done — no content returned.' : `Request failed (${res.status})`));
             return body;
         } catch (err) {
-            setReadout(false, 'ERR', 'connection failed', 'Could not reach the server: ' + err.message);
+            showResult(resultId, false, 'Could not reach the server: ' + err.message);
         }
     }
 
-    // ---- CREATE ----  Backend: POST /create
-    function createStudent(){
-        const payload = {
-            id: Number(document.getElementById('c-id').value.trim()),
-            name: document.getElementById('c-name').value.trim(),
-            age: Number(document.getElementById('c-age').value.trim()),
-            department: document.getElementById('c-dep').value.trim(),
-        };
+    // ---- CREATE ----
+    function createStudent() {
+        const idVal = document.getElementById('c-id').value.trim();
+        const name = document.getElementById('c-name').value.trim();
+        const ageVal = document.getElementById('c-age').value.trim();
+        const department = document.getElementById('c-dep').value.trim();
+
+        if (!idVal || !name || !ageVal || !department) {
+            return showResult('result-create', false, 'All fields are required — fill in ID, name, age, and department.');
+        }
+
+        const id = parseInt(idVal, 10);
+        const age = parseInt(ageVal, 10);
+
+        if (isNaN(id) || id <= 0) {
+            return showResult('result-create', false, 'Student ID must be a positive integer.');
+        }
+        if (isNaN(age) || age <= 0) {
+            return showResult('result-create', false, 'Age must be a positive integer.');
+        }
+
+        const payload = { id, name, age, department };
+
         callApi(`${base()}/create`, {
-            method:'POST',
-            headers:{ 'Content-Type':'application/json' },
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
-        });
+        }, 'result-create');
     }
 
-    // ---- LOOKUP ----  Backend: GET /get/{id}
-    function getStudent(){
-        const id = document.getElementById('l-id').value.trim();
-        if (!id) return setReadout(false, 'ERR', 'missing id', 'Enter a student ID first.');
-        callApi(`${base()}/get/${encodeURIComponent(id)}`, { method:'GET' });
+    // ---- LOOKUP ----
+    function getStudent() {
+        const idVal = document.getElementById('l-id').value.trim();
+        if (!idVal) return showResult('result-lookup', false, 'Enter a student ID first.');
+
+        const id = parseInt(idVal, 10);
+        if (isNaN(id) || id <= 0) {
+            return showResult('result-lookup', false, 'Student ID must be a positive integer.');
+        }
+
+        callApi(`${base()}/get/${encodeURIComponent(id)}`, { method: 'GET' }, 'result-lookup');
     }
 
-    // ---- UPDATE ----  Backend: POST /update/{id}
-    function updateStudent(){
-        const id = document.getElementById('u-id').value.trim();
+    // ---- UPDATE ----
+    function updateStudent() {
+        const idVal = document.getElementById('u-id').value.trim();
         const name = document.getElementById('u-name').value.trim();
-        const age = document.getElementById('u-age').value.trim();
-        const department = document.getElementById('u-dep').value.trim();
+        const ageVal = document.getElementById('u-age').value.trim();
+        const dep = document.getElementById('u-dep').value.trim();
 
-        if (!id) return setReadout(false, 'ERR', 'missing id', 'Enter a student ID first.');
-        if (!name || !age || !department) {
-            return setReadout(false, 'ERR', 'missing fields', 'This endpoint overwrites the whole record — fill in name, age, and department.');
+        if (!idVal) return showResult('result-update', false, 'Enter a student ID first.');
+        if (!name || !ageVal || !dep) {
+            return showResult('result-update', false, 'This endpoint overwrites the whole record — fill in name, age, and department.');
+        }
+
+        const id = parseInt(idVal, 10);
+        const age = parseInt(ageVal, 10);
+
+        if (isNaN(id) || id <= 0) {
+            return showResult('result-update', false, 'Student ID must be a positive integer.');
+        }
+        if (isNaN(age) || age <= 0) {
+            return showResult('result-update', false, 'Age must be a positive integer.');
         }
 
         callApi(`${base()}/update/${encodeURIComponent(id)}`, {
-            method:'POST',
-            headers:{ 'Content-Type':'application/json' },
-            body: JSON.stringify({ name, age:Number(age), department }),
-        });
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, name, age, department: dep }),
+        }, 'result-update');
     }
 
-    // ---- DELETE ----  Backend: POST /delete/{id}
-    function deleteStudent(){
-        const id = document.getElementById('d-id').value.trim();
-        if (!id) return setReadout(false, 'ERR', 'missing id', 'Enter a student ID first.');
-        callApi(`${base()}/delete/${encodeURIComponent(id)}`, { method:'POST' });
+    // ---- DELETE ----
+    function deleteStudent() {
+        const idVal = document.getElementById('d-id').value.trim();
+        if (!idVal) return showResult('result-remove', false, 'Enter a student ID first.');
+
+        const id = parseInt(idVal, 10);
+        if (isNaN(id) || id <= 0) {
+            return showResult('result-remove', false, 'Student ID must be a positive integer.');
+        }
+
+        callApi(`${base()}/delete/${encodeURIComponent(id)}`, { method: 'DELETE' }, 'result-remove');
     }
 </script>
 

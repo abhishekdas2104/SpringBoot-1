@@ -12,7 +12,6 @@ public class StudentController {
 
     StudentService studentService;
 
-
     @Autowired
     public StudentController(StudentService studentService) {
         this.studentService = studentService;
@@ -20,47 +19,59 @@ public class StudentController {
 
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestBody Student student) {
-        // Ensure ID is not set (let database auto-generate it)
-        student.setId(0);
 
-        Student saved = studentService.saveStudent(student);
+        Student saved = studentService.studentValidate(student);
+
+        if (saved == null) {
+            return ResponseEntity.status(400).body("Invalid student data");
+        }
+
         return ResponseEntity.status(201).body(saved);
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<?> getStudents(@PathVariable int id){
+    public ResponseEntity<?> getStudent(@PathVariable int id) {
+
         Student student = studentService.getStudentById(id);
-        return ResponseEntity.status(200).body(student);
-    }
 
-    @PostMapping("/update/{id}")
-    public ResponseEntity<?> update(@PathVariable int id,@RequestBody Student updatedStudent){
-        Student exstudent = studentService.getStudentById(id);
-
-        if(exstudent == null){
+        if (student == null) {
             return ResponseEntity.status(404).body("Student not found");
         }
-        exstudent.setName(updatedStudent.getName());
-        exstudent.setAge(updatedStudent.getAge());
-        exstudent.setDepartment(updatedStudent.getDepartment());
 
-        Student saved = studentService.saveStudent(exstudent);
+        return ResponseEntity.ok(student);
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> update(
+            @PathVariable int id,
+            @RequestBody Student updatedStudent) {
+
+        Student existingStudent = studentService.getStudentById(id);
+
+        if (existingStudent == null) {
+            return ResponseEntity.status(404).body("Student not found");
+        }
+
+        existingStudent.setName(updatedStudent.getName());
+        existingStudent.setAge(updatedStudent.getAge());
+        existingStudent.setDepartment(updatedStudent.getDepartment());
+
+        Student saved = studentService.saveStudent(existingStudent);
+
         return ResponseEntity.ok(saved);
     }
 
-    @PostMapping("/delete/{id}")
-    public ResponseEntity<?> delete(@PathVariable int id){
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> delete(@PathVariable int id) {
+
         Student student = studentService.getStudentById(id);
-        if(student==null){
+
+        if (student == null) {
             return ResponseEntity.status(404).body("Student not found");
         }
+
         studentService.deleteStudent(id);
 
-        return ResponseEntity.status(200).body("Student deleted successfully");
+        return ResponseEntity.ok("Student deleted successfully");
     }
-
 }
-
-
-//public ResponseEntity<?> getStudent(@PathVariable int id){
-//Here '?' means that ResponseEntity can contain any type of data and we will define the return type while run time
