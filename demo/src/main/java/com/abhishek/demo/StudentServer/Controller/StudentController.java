@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin(origins = "*")
 public class StudentController {
 
     StudentService studentService;
@@ -19,10 +20,9 @@ public class StudentController {
 
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestBody Student student) {
-        Student existingStudent = studentService.getStudentById(student.getId());
-        if (existingStudent != null) {
-            return ResponseEntity.status(400).body("Student already exists");
-        }
+        // Ensure ID is not set (let database auto-generate it)
+        student.setId(0);
+
         Student saved = studentService.saveStudent(student);
         return ResponseEntity.status(201).body(saved);
     }

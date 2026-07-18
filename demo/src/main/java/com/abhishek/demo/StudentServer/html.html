@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registry — Departures</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --case:#16171a;
+            --case-trim:#2b2d31;
+            --rail:#3a3d43;
+            --flap-bg:#f0ebe0;
+            --flap-ink:#17181a;
+            --flap-seam:rgba(0,0,0,0.22);
+            --paper-dim:#a9adb5;
+            --paper-dim-2:#787c85;
+
+            --create:#2f8f5b;
+            --create-bg:rgba(47,143,91,0.16);
+            --lookup:#2f79b0;
+            --lookup-bg:rgba(47,121,176,0.16);
+            --update:#c98a1f;
+            --update-bg:rgba(201,138,31,0.16);
+            --delete:#b23a2e;
+            --delete-bg:rgba(178,58,46,0.16);
+
+            --focus:#5fb0e0;
+            --display:'Barlow Condensed', sans-serif;
+            --body-font:'Barlow', sans-serif;
+            --mono:'IBM Plex Mono', monospace;
+        }
+
+        * { box-sizing:border-box; }
+
+        body{
+            margin:0;
+            min-height:100vh;
+            background:#0c0d0f;
+            background-image: radial-gradient(circle at 50% 0%, #1c1e22 0%, #0c0d0f 60%);
+            color:var(--paper-dim);
+            font-family:var(--body-font);
+            padding:40px 16px 70px;
+        }
+
+        .board{
+            max-width:640px;
+            margin:0 auto;
+            background:var(--case);
+            border:1px solid var(--case-trim);
+            border-radius:10px;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(255,255,255,0.02);
+            padding:22px 22px 26px;
+        }
+
+        .board-head{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:14px;
+            padding:6px 0 4px;
+        }
+        .rivet{
+            width:8px; height:8px; border-radius:50%;
+            background:radial-gradient(circle at 35% 35%, #6b6f77, #26282c 70%);
+            flex-shrink:0;
+        }
+        h1{
+            font-family:var(--display);
+            font-weight:700;
+            text-transform:uppercase;
+            letter-spacing:0.16em;
+            font-size:clamp(22px, 4vw, 30px);
+            color:var(--flap-bg);
+            margin:0;
+            text-align:center;
+        }
+        .board-sub{
+            text-align:center;
+            font-family:var(--mono);
+            font-size:11px;
+            letter-spacing:0.05em;
+            color:var(--paper-dim-2);
+            margin:2px 0 20px;
+        }
+
+        /* ---------- MANIFEST TABLE ---------- */
+        .manifest{
+            border-top:1px solid var(--rail);
+            border-bottom:1px solid var(--rail);
+        }
+        .manifest-head-row{
+            display:grid;
+            grid-template-columns: 40px 1fr 1fr 34px 20px;
+            gap:8px;
+            padding:8px 6px;
+            font-family:var(--mono);
+            font-size:10px;
+            letter-spacing:0.08em;
+            text-transform:uppercase;
+            color:var(--paper-dim-2);
+            border-bottom:1px dashed var(--rail);
+        }
+
+        .row + .row{ border-top:1px dashed var(--rail); }
+
+        .row-head{
+            display:grid;
+            grid-template-columns: 40px 1fr 1fr 34px 20px;
+            gap:8px;
+            align-items:center;
+            width:100%;
+            background:transparent;
+            border:none;
+            padding:13px 6px;
+            cursor:pointer;
+            text-align:left;
+            color:var(--flap-bg);
+            font-family:var(--body-font);
+        }
+        .row-head:hover{ background:rgba(255,255,255,0.03); }
+        .row-head:focus-visible{ outline:2px solid var(--focus); outline-offset:-2px; }
+
+        .trk{
+            font-family:var(--mono);
+            font-size:13px;
+            color:var(--paper-dim-2);
+        }
+        .opname{
+            font-family:var(--display);
+            font-weight:700;
+            letter-spacing:0.04em;
+            font-size:17px;
+            text-transform:uppercase;
+        }
+        .route{
+            font-family:var(--mono);
+            font-size:11.5px;
+            color:var(--paper-dim);
+        }
+        .flag{
+            width:14px; height:14px;
+            border-radius:3px;
+            justify-self:center;
+        }
+        .row[data-op="create"] .flag{ background:var(--create); }
+        .row[data-op="lookup"] .flag{ background:var(--lookup); }
+        .row[data-op="update"] .flag{ background:var(--update); }
+        .row[data-op="remove"] .flag{ background:var(--delete); }
+
+        .chev{
+            font-size:12px;
+            color:var(--paper-dim-2);
+            justify-self:end;
+            transition:transform .15s ease;
+        }
+        .row.open .chev{ transform:rotate(180deg); }
+
+        .row-panel{
+            display:none;
+            padding:4px 8px 20px 48px;
+        }
+        .row.open .row-panel{ display:block; }
+
+        .op-desc{
+            font-size:13px;
+            color:var(--paper-dim-2);
+            margin:0 0 16px;
+            line-height:1.5;
+            max-width:46ch;
+        }
+
+        .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+        .field{ margin-bottom:12px; }
+        .field label{
+            display:block;
+            font-family:var(--mono);
+            font-size:10px;
+            letter-spacing:0.06em;
+            text-transform:uppercase;
+            color:var(--paper-dim-2);
+            margin-bottom:5px;
+        }
+        .field input{
+            width:100%;
+            background:#0f1012;
+            border:1px solid var(--rail);
+            border-radius:5px;
+            color:var(--flap-bg);
+            font-family:var(--mono);
+            font-size:13px;
+            padding:9px 10px;
+            outline:none;
+        }
+        .field input:focus{ border-color:var(--focus); }
+        .field input::placeholder{ color:#585c63; }
+
+        .depart{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            font-family:var(--display);
+            font-weight:700;
+            letter-spacing:0.06em;
+            text-transform:uppercase;
+            font-size:13.5px;
+            color:#0c0d0f;
+            border:none;
+            border-radius:5px;
+            padding:9px 18px;
+            cursor:pointer;
+            margin-top:6px;
+        }
+        .depart:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+        .row[data-op="create"] .depart{ background:var(--create); }
+        .row[data-op="lookup"] .depart{ background:var(--lookup); }
+        .row[data-op="update"] .depart{ background:var(--update); }
+        .row[data-op="remove"] .depart{ background:var(--delete); }
+
+        /* ---------- READOUT ---------- */
+        .readout{ margin-top:22px; }
+        .readout-head{
+            font-family:var(--mono);
+            font-size:10px;
+            letter-spacing:0.1em;
+            text-transform:uppercase;
+            color:var(--paper-dim-2);
+            margin-bottom:8px;
+        }
+
+        .flap-row{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            margin-bottom:10px;
+        }
+        .flap-slot{
+            position:relative;
+            width:32px; height:44px;
+            background:var(--flap-bg);
+            color:var(--flap-ink);
+            border-radius:3px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-family:var(--display);
+            font-weight:700;
+            font-size:26px;
+            box-shadow: inset 0 -12px 14px -10px rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.08);
+            perspective: 120px;
+            flex-shrink:0;
+        }
+        .flap-slot::after{
+            content:'';
+            position:absolute;
+            left:0; right:0; top:50%;
+            height:1px;
+            background:var(--flap-seam);
+        }
+        .flap-slot.flip{ animation:flipDown .32s ease; }
+        @keyframes flipDown{
+            0%{ transform:rotateX(0deg); }
+            48%{ transform:rotateX(-90deg); }
+            52%{ transform:rotateX(90deg); }
+            100%{ transform:rotateX(0deg); }
+        }
+
+        .readout-caption{
+            font-family:var(--mono);
+            font-size:12px;
+            color:var(--paper-dim-2);
+        }
+        .readout-caption.ok{ color:var(--create); }
+        .readout-caption.err{ color:var(--delete); }
+
+        .readout-body{
+            margin:0;
+            background:#0f1012;
+            border:1px solid var(--rail);
+            border-radius:6px;
+            padding:12px 14px;
+            font-family:var(--mono);
+            font-size:12px;
+            line-height:1.6;
+            color:var(--paper-dim);
+            white-space:pre-wrap;
+            word-break:break-word;
+            min-height:20px;
+            max-height:260px;
+            overflow:auto;
+        }
+
+        .board-foot{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            margin-top:22px;
+            padding-top:16px;
+            border-top:1px solid var(--rail);
+        }
+        .board-foot label{
+            font-family:var(--mono);
+            font-size:10px;
+            letter-spacing:0.08em;
+            text-transform:uppercase;
+            color:var(--paper-dim-2);
+            flex-shrink:0;
+        }
+        .board-foot input{
+            flex:1;
+            background:#0f1012;
+            border:1px solid var(--rail);
+            border-radius:5px;
+            color:var(--flap-bg);
+            font-family:var(--mono);
+            font-size:12px;
+            padding:8px 10px;
+            outline:none;
+        }
+        .board-foot input:focus{ border-color:var(--focus); }
+
+        @media (max-width:520px){
+            .manifest-head-row, .row-head{ grid-template-columns: 28px 1fr 24px 18px; }
+            .route{ display:none; }
+            .row-panel{ padding-left:10px; }
+            .grid-2{ grid-template-columns:1fr; }
+            .board{ padding:18px 14px 20px; }
+        }
+
+        @media (prefers-reduced-motion: reduce){
+            * { animation:none !important; transition:none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="board">
+    <div class="board-head">
+        <span class="rivet"></span>
+        <h1>Student Registry</h1>
+        <span class="rivet"></span>
+    </div>
+    <p class="board-sub">live board — rows reflect your Spring API</p>
+
+    <div class="manifest" role="tablist" aria-label="Operations">
+        <div class="manifest-head-row">
+            <span>Trk</span><span>Operation</span><span>Route</span><span>Flag</span><span></span>
+        </div>
+
+        <div class="row open" data-op="create">
+            <button class="row-head" aria-expanded="true" aria-controls="panel-create">
+                <span class="trk">01</span>
+                <span class="opname">Create</span>
+                <span class="route">POST /create</span>
+                <span class="flag"></span>
+                <span class="chev">▾</span>
+            </button>
+            <div class="row-panel" id="panel-create">
+                <p class="op-desc">Adds a new record. Fails with 400 if the ID already exists.</p>
+                <div class="grid-2">
+                    <div class="field"><label for="c-name">Full name</label><input id="c-name" type="text" placeholder="e.g. Your Name"></div>
+                    <div class="field"><label for="c-id">Student ID</label><input id="c-id" type="text" placeholder="e.g. 101"></div>
+                </div>
+                <div class="grid-2">
+                    <div class="field"><label for="c-age">Age</label><input id="c-age" type="number" min="0" placeholder="e.g. 18"></div>
+                    <div class="field"><label for="c-dep">Department</label><input id="c-dep" type="text" placeholder="e.g. Computer Science"></div>
+                </div>
+                <button class="depart" onclick="createStudent()">Depart →</button>
+            </div>
+        </div>
+
+        <div class="row" data-op="lookup">
+            <button class="row-head" aria-expanded="false" aria-controls="panel-lookup">
+                <span class="trk">02</span>
+                <span class="opname">Lookup</span>
+                <span class="route">GET /get/:id</span>
+                <span class="flag"></span>
+                <span class="chev">▾</span>
+            </button>
+            <div class="row-panel" id="panel-lookup">
+                <p class="op-desc">Fetches a single record by ID.</p>
+                <div class="field"><label for="l-id">Student ID</label><input id="l-id" type="text" placeholder="e.g. 101"></div>
+                <button class="depart" onclick="getStudent()">Depart →</button>
+            </div>
+        </div>
+
+        <div class="row" data-op="update">
+            <button class="row-head" aria-expanded="false" aria-controls="panel-update">
+                <span class="trk">03</span>
+                <span class="opname">Update</span>
+                <span class="route">POST /update/:id</span>
+                <span class="flag"></span>
+                <span class="chev">▾</span>
+            </button>
+            <div class="row-panel" id="panel-update">
+                <p class="op-desc">Overwrites the whole record — fill in every field, including values that stay the same.</p>
+                <div class="field"><label for="u-id">Student ID</label><input id="u-id" type="text" placeholder="e.g. 101"></div>
+                <div class="grid-2">
+                    <div class="field"><label for="u-name">Full name</label><input id="u-name" type="text" placeholder="Name"></div>
+                    <div class="field"><label for="u-age">Age</label><input id="u-age" type="number" min="0" placeholder="Age"></div>
+                </div>
+                <div class="field"><label for="u-dep">Department</label><input id="u-dep" type="text" placeholder="Department"></div>
+                <button class="depart" onclick="updateStudent()">Depart →</button>
+            </div>
+        </div>
+
+        <div class="row" data-op="remove">
+            <button class="row-head" aria-expanded="false" aria-controls="panel-remove">
+                <span class="trk">04</span>
+                <span class="opname">Delete</span>
+                <span class="route">POST /delete/:id</span>
+                <span class="flag"></span>
+                <span class="chev">▾</span>
+            </button>
+            <div class="row-panel" id="panel-remove">
+                <p class="op-desc">Removes a record permanently. This cannot be undone.</p>
+                <div class="field"><label for="d-id">Student ID</label><input id="d-id" type="text" placeholder="e.g. 101"></div>
+                <button class="depart" onclick="deleteStudent()">Depart →</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="readout">
+        <div class="readout-head">Response</div>
+        <div class="flap-row">
+            <div class="flap-slot" data-i="0">&nbsp;</div>
+            <div class="flap-slot" data-i="1">&nbsp;</div>
+            <div class="flap-slot" data-i="2">&nbsp;</div>
+            <span class="readout-caption" id="readoutCaption">awaiting departure</span>
+        </div>
+        <pre class="readout-body" id="readoutBody"></pre>
+    </div>
+
+    <div class="board-foot">
+        <label for="baseUrl">Base&nbsp;url</label>
+        <input id="baseUrl" type="text" value="http://localhost:8080" spellcheck="false">
+    </div>
+</div>
+
+<script>
+    // ---- accordion ----
+    const rows = document.querySelectorAll('.row');
+    rows.forEach(row => {
+        row.querySelector('.row-head').addEventListener('click', () => {
+            const willOpen = !row.classList.contains('open');
+            rows.forEach(r => {
+                r.classList.remove('open');
+                r.querySelector('.row-head').setAttribute('aria-expanded', 'false');
+            });
+            if (willOpen) {
+                row.classList.add('open');
+                row.querySelector('.row-head').setAttribute('aria-expanded', 'true');
+            }
+        });
+    });
+
+    function base(){
+        return document.getElementById('baseUrl').value.replace(/\/$/, '');
+    }
+
+    // ---- flap status readout ----
+    const flapSlots = Array.from(document.querySelectorAll('.flap-slot'));
+    function setStatusFlaps(str){
+        const padded = str.toString().slice(0, 3).padStart(3, ' ').toUpperCase();
+        flapSlots.forEach((el, i) => {
+            const newChar = padded[i];
+            if (el.textContent.trim() !== newChar.trim() || el.textContent === '\u00A0') {
+                el.classList.add('flip');
+                setTimeout(() => { el.textContent = newChar === ' ' ? '\u00A0' : newChar; }, 150);
+                el.addEventListener('animationend', () => el.classList.remove('flip'), { once: true });
+            }
+        });
+    }
+
+    function setReadout(ok, statusLabel, captionText, bodyText){
+        setStatusFlaps(statusLabel);
+        const caption = document.getElementById('readoutCaption');
+        caption.textContent = captionText;
+        caption.className = 'readout-caption ' + (ok ? 'ok' : 'err');
+        document.getElementById('readoutBody').textContent = bodyText;
+    }
+
+    async function callApi(url, options){
+        try {
+            const res = await fetch(url, options);
+            let body;
+            const text = await res.text();
+            try { body = JSON.parse(text); } catch { body = text; }
+            const pretty = typeof body === 'string' ? body : JSON.stringify(body, null, 2);
+            setReadout(
+                res.ok,
+                res.status,
+                res.ok ? 'on time · ' + res.status : 'delayed · ' + res.status,
+                pretty || (res.ok ? 'Done — no content returned.' : `Request failed (${res.status})`)
+            );
+            return body;
+        } catch (err) {
+            setReadout(false, 'ERR', 'connection failed', 'Could not reach the server: ' + err.message);
+        }
+    }
+
+    // ---- CREATE ----  Backend: POST /create
+    function createStudent(){
+        const payload = {
+            id: Number(document.getElementById('c-id').value.trim()),
+            name: document.getElementById('c-name').value.trim(),
+            age: Number(document.getElementById('c-age').value.trim()),
+            department: document.getElementById('c-dep').value.trim(),
+        };
+        callApi(`${base()}/create`, {
+            method:'POST',
+            headers:{ 'Content-Type':'application/json' },
+            body: JSON.stringify(payload),
+        });
+    }
+
+    // ---- LOOKUP ----  Backend: GET /get/{id}
+    function getStudent(){
+        const id = document.getElementById('l-id').value.trim();
+        if (!id) return setReadout(false, 'ERR', 'missing id', 'Enter a student ID first.');
+        callApi(`${base()}/get/${encodeURIComponent(id)}`, { method:'GET' });
+    }
+
+    // ---- UPDATE ----  Backend: POST /update/{id}
+    function updateStudent(){
+        const id = document.getElementById('u-id').value.trim();
+        const name = document.getElementById('u-name').value.trim();
+        const age = document.getElementById('u-age').value.trim();
+        const department = document.getElementById('u-dep').value.trim();
+
+        if (!id) return setReadout(false, 'ERR', 'missing id', 'Enter a student ID first.');
+        if (!name || !age || !department) {
+            return setReadout(false, 'ERR', 'missing fields', 'This endpoint overwrites the whole record — fill in name, age, and department.');
+        }
+
+        callApi(`${base()}/update/${encodeURIComponent(id)}`, {
+            method:'POST',
+            headers:{ 'Content-Type':'application/json' },
+            body: JSON.stringify({ name, age:Number(age), department }),
+        });
+    }
+
+    // ---- DELETE ----  Backend: POST /delete/{id}
+    function deleteStudent(){
+        const id = document.getElementById('d-id').value.trim();
+        if (!id) return setReadout(false, 'ERR', 'missing id', 'Enter a student ID first.');
+        callApi(`${base()}/delete/${encodeURIComponent(id)}`, { method:'POST' });
+    }
+</script>
+
+</body>
+</html>

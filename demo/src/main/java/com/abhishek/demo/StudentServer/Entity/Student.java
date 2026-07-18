@@ -24,6 +24,7 @@ public class Student {
     private LocalDateTime updatedAt;
 
 
+
     public Student() {
     }
 
@@ -68,4 +69,4 @@ public class Student {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt;}
-    }
+}
