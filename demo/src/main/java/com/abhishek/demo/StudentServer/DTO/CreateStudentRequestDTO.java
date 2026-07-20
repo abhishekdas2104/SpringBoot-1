@@ -1,9 +1,17 @@
 package com.abhishek.demo.StudentServer.DTO;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+
 public class CreateStudentRequestDTO {
 
+    @NotBlank(message = "Name cannot be empty or null")
     private String name;
+
+    @Min(value = 0, message = "Age cannot be less than 0")
     private int age;
+
+    @NotBlank(message = "Department cannot be empty or null")
     private String department;
 
     public CreateStudentRequestDTO() {

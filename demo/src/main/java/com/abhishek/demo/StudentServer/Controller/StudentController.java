@@ -6,10 +6,10 @@ import com.abhishek.demo.StudentServer.DTO.UpdateStudentRequestDTO;
 import com.abhishek.demo.StudentServer.DTO.UpdateStudentResponseDTO;
 import com.abhishek.demo.StudentServer.Entity.Student;
 import com.abhishek.demo.StudentServer.Service.StudentService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -24,7 +24,7 @@ public class StudentController {
 
     @PostMapping("/create")
     public ResponseEntity<?> create(
-            @RequestBody CreateStudentRequestDTO createStudentRequestDTO) {
+            @Valid @RequestBody CreateStudentRequestDTO createStudentRequestDTO) {
 
         CreateStudentResponseDTO saved =
                 studentService.studentValidate(createStudentRequestDTO);
@@ -57,13 +57,15 @@ public class StudentController {
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(
             @PathVariable int id,
-            @RequestBody UpdateStudentRequestDTO updateStudentRequestDTO) {
+            @Valid @RequestBody UpdateStudentRequestDTO updateStudentRequestDTO) {
 
         UpdateStudentResponseDTO updatedStudent =
                 studentService.updateStudent(id, updateStudentRequestDTO);
 
         if (updatedStudent == null) {
-            return ResponseEntity.status(404).body("Student not found");
+            return ResponseEntity
+                    .status(404)
+                    .body("Student not found");
         }
 
         return ResponseEntity.ok(updatedStudent);

@@ -3,12 +3,11 @@ package com.abhishek.demo.StudentServer.Service;
 import com.abhishek.demo.StudentServer.DTO.CreateStudentRequestDTO;
 import com.abhishek.demo.StudentServer.DTO.CreateStudentResponseDTO;
 import com.abhishek.demo.StudentServer.DTO.UpdateStudentRequestDTO;
+import com.abhishek.demo.StudentServer.DTO.UpdateStudentResponseDTO;
 import com.abhishek.demo.StudentServer.Entity.Student;
 import com.abhishek.demo.StudentServer.Repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.abhishek.demo.StudentServer.DTO.UpdateStudentRequestDTO;
-import com.abhishek.demo.StudentServer.DTO.UpdateStudentResponseDTO;
 
 import java.time.LocalDateTime;
 
@@ -25,17 +24,8 @@ public class StudentService {
     public CreateStudentResponseDTO studentValidate(
             CreateStudentRequestDTO createStudentRequestDTO) {
 
-        if (createStudentRequestDTO == null ||
-                createStudentRequestDTO.getName() == null ||
-                createStudentRequestDTO.getName().trim().isEmpty() ||
-                createStudentRequestDTO.getAge() <= 0 ||
-                createStudentRequestDTO.getDepartment() == null ||
-                createStudentRequestDTO.getDepartment().trim().isEmpty()) {
-
-            return null;
-        }
-
         Student student = mapToStudent(createStudentRequestDTO);
+
         Student savedStudent = studentRepository.save(student);
 
         return mapToResponseDTO(savedStudent);
@@ -43,10 +33,6 @@ public class StudentService {
 
     public Student getStudentById(int id) {
         return studentRepository.findById(id).orElse(null);
-    }
-
-    public Student saveStudent(Student student) {
-        return studentRepository.save(student);
     }
 
     public UpdateStudentResponseDTO updateStudent(
@@ -64,7 +50,8 @@ public class StudentService {
         existingStudent.setAge(updateStudentRequestDTO.getAge());
         existingStudent.setUpdatedAt(LocalDateTime.now());
 
-        Student savedStudent = studentRepository.save(existingStudent);
+        Student savedStudent =
+                studentRepository.save(existingStudent);
 
         return new UpdateStudentResponseDTO(
                 savedStudent.getId(),
@@ -85,6 +72,7 @@ public class StudentService {
         }
 
         studentRepository.deleteById(id);
+
         return true;
     }
 
