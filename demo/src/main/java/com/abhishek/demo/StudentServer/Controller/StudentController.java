@@ -2,11 +2,14 @@ package com.abhishek.demo.StudentServer.Controller;
 
 import com.abhishek.demo.StudentServer.DTO.CreateStudentRequestDTO;
 import com.abhishek.demo.StudentServer.DTO.CreateStudentResponseDTO;
+import com.abhishek.demo.StudentServer.DTO.UpdateStudentRequestDTO;
+import com.abhishek.demo.StudentServer.DTO.UpdateStudentResponseDTO;
 import com.abhishek.demo.StudentServer.Entity.Student;
 import com.abhishek.demo.StudentServer.Service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -54,17 +57,16 @@ public class StudentController {
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(
             @PathVariable int id,
-            @RequestBody CreateStudentRequestDTO updatedStudent) {
+            @RequestBody UpdateStudentRequestDTO updateStudentRequestDTO) {
 
-        Student saved = studentService.updateStudent(id, updatedStudent);
+        UpdateStudentResponseDTO updatedStudent =
+                studentService.updateStudent(id, updateStudentRequestDTO);
 
-        if (saved == null) {
-            return ResponseEntity
-                    .status(404)
-                    .body("Student not found");
+        if (updatedStudent == null) {
+            return ResponseEntity.status(404).body("Student not found");
         }
 
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.ok(updatedStudent);
     }
 
     @DeleteMapping("/delete/{id}")

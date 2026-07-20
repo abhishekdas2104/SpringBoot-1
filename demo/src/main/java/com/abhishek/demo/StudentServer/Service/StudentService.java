@@ -2,10 +2,13 @@ package com.abhishek.demo.StudentServer.Service;
 
 import com.abhishek.demo.StudentServer.DTO.CreateStudentRequestDTO;
 import com.abhishek.demo.StudentServer.DTO.CreateStudentResponseDTO;
+import com.abhishek.demo.StudentServer.DTO.UpdateStudentRequestDTO;
 import com.abhishek.demo.StudentServer.Entity.Student;
 import com.abhishek.demo.StudentServer.Repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.abhishek.demo.StudentServer.DTO.UpdateStudentRequestDTO;
+import com.abhishek.demo.StudentServer.DTO.UpdateStudentResponseDTO;
 
 import java.time.LocalDateTime;
 
@@ -46,9 +49,9 @@ public class StudentService {
         return studentRepository.save(student);
     }
 
-    public Student updateStudent(
+    public UpdateStudentResponseDTO updateStudent(
             int id,
-            CreateStudentRequestDTO updatedStudent) {
+            UpdateStudentRequestDTO updateStudentRequestDTO) {
 
         Student existingStudent =
                 studentRepository.findById(id).orElse(null);
@@ -57,12 +60,19 @@ public class StudentService {
             return null;
         }
 
-        existingStudent.setName(updatedStudent.getName());
-        existingStudent.setAge(updatedStudent.getAge());
-        existingStudent.setDepartment(updatedStudent.getDepartment());
+        existingStudent.setName(updateStudentRequestDTO.getName());
+        existingStudent.setAge(updateStudentRequestDTO.getAge());
         existingStudent.setUpdatedAt(LocalDateTime.now());
 
-        return studentRepository.save(existingStudent);
+        Student savedStudent = studentRepository.save(existingStudent);
+
+        return new UpdateStudentResponseDTO(
+                savedStudent.getId(),
+                savedStudent.getName(),
+                savedStudent.getAge(),
+                savedStudent.getDepartment(),
+                "Student information is updated"
+        );
     }
 
     public boolean deleteStudent(int id) {
