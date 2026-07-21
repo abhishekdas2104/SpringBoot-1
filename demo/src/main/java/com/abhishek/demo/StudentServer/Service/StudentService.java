@@ -5,6 +5,7 @@ import com.abhishek.demo.StudentServer.DTO.CreateStudentResponseDTO;
 import com.abhishek.demo.StudentServer.DTO.UpdateStudentRequestDTO;
 import com.abhishek.demo.StudentServer.DTO.UpdateStudentResponseDTO;
 import com.abhishek.demo.StudentServer.Entity.Student;
+import com.abhishek.demo.StudentServer.Exception.StudentNotFoundException;
 import com.abhishek.demo.StudentServer.Repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,26 +33,25 @@ public class StudentService {
     }
 
     public Student getStudentById(int id) {
-        return studentRepository.findById(id).orElse(null);
+
+        return studentRepository.findById(id)
+                .orElseThrow(() ->
+                        new StudentNotFoundException("Student not found"));
     }
 
     public UpdateStudentResponseDTO updateStudent(
             int id,
             UpdateStudentRequestDTO updateStudentRequestDTO) {
 
-        Student existingStudent =
-                studentRepository.findById(id).orElse(null);
-
-        if (existingStudent == null) {
-            return null;
-        }
+        Student existingStudent = studentRepository.findById(id)
+                .orElseThrow(() ->
+                        new StudentNotFoundException("Student not found"));
 
         existingStudent.setName(updateStudentRequestDTO.getName());
         existingStudent.setAge(updateStudentRequestDTO.getAge());
         existingStudent.setUpdatedAt(LocalDateTime.now());
 
-        Student savedStudent =
-                studentRepository.save(existingStudent);
+        Student savedStudent = studentRepository.save(existingStudent);
 
         return new UpdateStudentResponseDTO(
                 savedStudent.getId(),
@@ -62,18 +62,13 @@ public class StudentService {
         );
     }
 
-    public boolean deleteStudent(int id) {
+    public void deleteStudent(int id) {
 
-        Student student =
-                studentRepository.findById(id).orElse(null);
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() ->
+                        new StudentNotFoundException("Student not found"));
 
-        if (student == null) {
-            return false;
-        }
-
-        studentRepository.deleteById(id);
-
-        return true;
+        studentRepository.delete(student);
     }
 
     private Student mapToStudent(
@@ -101,4 +96,5 @@ public class StudentService {
                 student.getUpdatedAt()
         );
     }
+
 }

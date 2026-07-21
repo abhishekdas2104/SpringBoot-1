@@ -29,27 +29,13 @@ public class StudentController {
         CreateStudentResponseDTO saved =
                 studentService.studentValidate(createStudentRequestDTO);
 
-        if (saved == null) {
-            return ResponseEntity
-                    .status(400)
-                    .body("Invalid student data");
-        }
-
-        return ResponseEntity
-                .status(201)
-                .body(saved);
+        return ResponseEntity.status(201).body(saved);
     }
 
     @GetMapping("/get/{id}")
     public ResponseEntity<?> getStudent(@PathVariable int id) {
 
         Student student = studentService.getStudentById(id);
-
-        if (student == null) {
-            return ResponseEntity
-                    .status(404)
-                    .body("Student not found");
-        }
 
         return ResponseEntity.ok(student);
     }
@@ -62,26 +48,15 @@ public class StudentController {
         UpdateStudentResponseDTO updatedStudent =
                 studentService.updateStudent(id, updateStudentRequestDTO);
 
-        if (updatedStudent == null) {
-            return ResponseEntity
-                    .status(404)
-                    .body("Student not found");
-        }
-
         return ResponseEntity.ok(updatedStudent);
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable int id) {
 
-        boolean deleted = studentService.deleteStudent(id);
-
-        if (!deleted) {
-            return ResponseEntity
-                    .status(404)
-                    .body("Student not found");
-        }
+        studentService.deleteStudent(id);
 
         return ResponseEntity.ok("Student deleted successfully");
     }
+
 }
