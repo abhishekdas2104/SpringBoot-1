@@ -18,25 +18,14 @@ public class Student {
 
     private String department;
 
+    @Column(unique = true)
+    private String email;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
 
     public Student() {
-    }
-
-    public Student(
-            String name,
-            int age,
-            String department,
-            LocalDateTime createdAt,
-            LocalDateTime updatedAt) {
-
-        this.name = name;
-        this.age = age;
-        this.department = department;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
     }
 
     public int getId() {
@@ -69,6 +58,14 @@ public class Student {
 
     public void setDepartment(String department) {
         this.department = department;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public LocalDateTime getCreatedAt() {

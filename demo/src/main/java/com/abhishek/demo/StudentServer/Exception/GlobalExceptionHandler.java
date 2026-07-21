@@ -13,7 +13,9 @@ public class GlobalExceptionHandler {
             MethodArgumentNotValidException ex) {
 
         return ResponseEntity.badRequest().body(
-                ex.getBindingResult().getFieldError().getDefaultMessage()
+                ex.getBindingResult()
+                        .getFieldError()
+                        .getDefaultMessage()
         );
     }
 
@@ -21,6 +23,17 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> studentNotFound(
             StudentNotFoundException ex) {
 
-        return ResponseEntity.status(404).body(ex.getMessage());
+        return ResponseEntity
+                .status(404)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<String> duplicateEmail(
+            EmailAlreadyExistsException ex) {
+
+        return ResponseEntity
+                .status(409)
+                .body(ex.getMessage());
     }
 }

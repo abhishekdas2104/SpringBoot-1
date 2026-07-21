@@ -24,10 +24,10 @@ public class StudentController {
 
     @PostMapping("/create")
     public ResponseEntity<?> create(
-            @Valid @RequestBody CreateStudentRequestDTO createStudentRequestDTO) {
+            @Valid @RequestBody CreateStudentRequestDTO requestDTO) {
 
         CreateStudentResponseDTO saved =
-                studentService.studentValidate(createStudentRequestDTO);
+                studentService.studentValidate(requestDTO);
 
         return ResponseEntity.status(201).body(saved);
     }
@@ -40,13 +40,30 @@ public class StudentController {
         return ResponseEntity.ok(student);
     }
 
+    @GetMapping("/email/lookup")
+    public ResponseEntity<String> lookupEmail(
+            @RequestParam String email) {
+
+        boolean exists = studentService.lookupEmail(email);
+
+        if (exists) {
+            return ResponseEntity.ok(
+                    "Email is already present in the database"
+            );
+        }
+
+        return ResponseEntity.ok(
+                "Email is not present in the database"
+        );
+    }
+
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(
             @PathVariable int id,
-            @Valid @RequestBody UpdateStudentRequestDTO updateStudentRequestDTO) {
+            @Valid @RequestBody UpdateStudentRequestDTO requestDTO) {
 
         UpdateStudentResponseDTO updatedStudent =
-                studentService.updateStudent(id, updateStudentRequestDTO);
+                studentService.updateStudent(id, requestDTO);
 
         return ResponseEntity.ok(updatedStudent);
     }
@@ -56,7 +73,8 @@ public class StudentController {
 
         studentService.deleteStudent(id);
 
-        return ResponseEntity.ok("Student deleted successfully");
+        return ResponseEntity.ok(
+                "Student deleted successfully"
+        );
     }
-
 }
